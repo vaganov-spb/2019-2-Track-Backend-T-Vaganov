@@ -2,4 +2,5 @@ venv/
 *.pyc
 *.swo
 *.swp
-
+messenger/application/django_conf.py
+*.DS_Store
