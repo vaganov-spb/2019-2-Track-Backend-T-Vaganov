@@ -1,14 +1,40 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from users.models import User, Member
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
+
+@require_http_methods(["GET"])
+def search_by_username(request):
+    username = request.GET.get('search')
+    if not username:
+        return HttpResponseBadRequest("Cant get search param")
+    users = User.objects.filter(username__icontains=username)
+    if users.exists():
+        users = users.values('id', 'username', 'first_name', 'last_name')
+        return JsonResponse(list(users), safe=False, json_dumps_params={'ensure_ascii': False})
+    return JsonResponse('User not found', safe=False)
+    # return HttpResponse(list(users))
+
+
+@require_http_methods(["GET"])
 def profile(request, user_id):
-        if request.method == 'GET':
-                return JsonResponse({'Your ID': '{}'.format(user_id)})
-        return HttpResponse(status=405)
+    user = get_object_or_404(User, id=user_id)
+    data = {
+               'id': user.id,
+               'first name': user.first_name,
+               'last name': user.last_name,
+               'username': user.username,
+               'last login': user.last_login,
+               #'avatar': user.avatar,
+               'date joined': user.date_joined,
+    }
+    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
 
+
+@require_http_methods(["GET"])
 def contact_list(request, user_id):
-        if request.method == 'GET':
-                return JsonResponse({'Your Contact List': '{}'.format(user_id)})
-        return HttpResponse(status=405)
-
+    user = User.objects.all()
+    user = user.values('id', 'first_name', 'last_name', 'username', 'avatar')
+    return JsonResponse(list(user), safe=False, json_dumps_params={'ensure_ascii': False})
 

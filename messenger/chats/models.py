@@ -6,14 +6,17 @@ class Chat(models.Model):
     topic = models.CharField(
         max_length=32,
         blank=False,
+        verbose_name='Название чата',
     )
     last_message = models.CharField(
         max_length=4096,
-        blank=False
+        blank=False,
+        null=True,
+        verbose_name='Последнне прочитанное сообщение',
     )
 
     def __str__(self):
-        return self.last_message
+        return self.topic
 
     class Meta:
         verbose_name = 'Чат'
@@ -33,6 +36,7 @@ class Message(models.Model):
     content = models.CharField(
         max_length=4096,
         blank=False,
+        verbose_name='Содержание',
     )
     added_at = models.DateTimeField(
         auto_now=False,
@@ -67,10 +71,12 @@ class Attachment(models.Model):
     type = models.CharField(
         max_length=10,
         blank=False,
+        verbose_name='Тип',
     )
     url = models.URLField(
         max_length=200,
         blank=False,
+        verbose_name='Адрес изображения',
     )
 
     def __str__(self):

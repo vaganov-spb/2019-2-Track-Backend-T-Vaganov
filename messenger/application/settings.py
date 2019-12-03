@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -128,6 +128,13 @@ USE_L10N = True
 
 USE_TZ = True
 
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_S3_ENDPOINT_URL = 'http://hb.bizmrg.com'
+AWS_ACCESS_KEY_ID = 'b4YGx6BYt9YkAHcdz9JSpT'
+AWS_SECRET_ACCESS_KEY = '36quAecsurSxyJ8WgypVUPP9dehiQe4SjfemmSgrEVX1'
+AWS_STORAGE_BUCKET_NAME = 'track_vaganov'
+
+MEDIA_ROOT = '/Users/apple/2019-2-Track-Backend-T-Vaganov/messenger/media'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

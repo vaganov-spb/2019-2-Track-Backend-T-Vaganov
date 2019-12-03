@@ -2,15 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-    nick = models.CharField(
-        max_length=16,
-        blank=False,
-        unique=True,
-    )
     avatar = models.ImageField(
         upload_to='avatar/',
         blank=True,
         null=True,
+        verbose_name='Аватар',
     )
 
     def __str__(self):
@@ -21,28 +17,29 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи' 
 
 
-
-
 class Member(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name="user id",
+        verbose_name="user_id",
     )
     chat = models.ForeignKey(
         'chats.Chat',
         on_delete=models.CASCADE,
-        verbose_name="chat id",
+        verbose_name="chat_id",
     )
-    new_messages = models.BooleanField(default=True)
+
+    new_messages = models.BooleanField(default=False)
+
     last_read_message = models.ForeignKey(
         'chats.Message',
+        null=True,
         on_delete=models.PROTECT,
         verbose_name="last read message id",
     )
 
     def __str__(self):
-        return self.user
+        return f'{self.user.__str__()} in {self.chat.__str__()}'
 
     class Meta:
         verbose_name = 'Участник чата'
