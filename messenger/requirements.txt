@@ -6,8 +6,10 @@ boto3==1.10.29
 botocore==1.13.29
 decorator==4.4.1
 Django==2.2.5
+django-cors-headers==3.2.0
 django-storages==1.8
 docutils==0.15.2
+freeze==1.0.10
 gunicorn==19.9.0
 importlib-metadata==0.23
 ipython==7.9.0

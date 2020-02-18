@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from users.models import User, Member
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
@@ -33,8 +33,20 @@ def profile(request, user_id):
 
 
 @require_http_methods(["GET"])
-def contact_list(request, user_id):
+def contact_list(request):
     user = User.objects.all()
     user = user.values('id', 'first_name', 'last_name', 'username', 'avatar')
     return JsonResponse(list(user), safe=False, json_dumps_params={'ensure_ascii': False})
+
+
+@require_http_methods(["GET"])
+def get_id(request):
+    name = request.GET.get('name', 'root')
+    try:
+        member = Member.objects.get(user__username=name, chat__topic='Group Chat')
+    except Member.DoesNotExist:
+        return HttpResponseForbidden()
+    user = User.objects.get(username=name)
+    return JsonResponse(user.id, safe=False, json_dumps_params={'ensure_ascii': False})
+
 
