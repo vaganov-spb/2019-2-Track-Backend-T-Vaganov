@@ -2,6 +2,7 @@ from django.db import models
 from users.models import User
 from datetime import datetime
 
+
 class Chat(models.Model):
     is_group_chat = models.BooleanField(default=False)
     topic = models.CharField(

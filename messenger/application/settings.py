@@ -93,6 +93,9 @@ DATABASES = {
         'PASSWORD': LOCAL_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '5432',
+        'TEST': {
+               'NAME': 'test_quack_db',
+           }
     }
 }
 

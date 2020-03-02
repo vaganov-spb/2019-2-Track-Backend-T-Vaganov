@@ -10,13 +10,19 @@ class ChatForm(forms.ModelForm):
         self._user_id = kwargs.pop('user_id')
         super(ChatForm, self).__init__(*args, **kwargs)
 
+    def clean_topic(self):
+        topic = self.cleaned_data['topic']
+        if not (type(topic) == str):
+            self.add_error('topic', 'Incorrect topic type')
+        return topic
+
     def clean(self):
-        super(ChatForm, self).clean()
+        cleaned_data = super(ChatForm, self).clean()
         try:
             user = User.objects.get(id=self._user_id)
         except User.DoesNotExist:
             self.add_error('topic', 'No such user to create chat')
-        return self.cleaned_data
+        return cleaned_data
 
     class Meta:
         model = Chat

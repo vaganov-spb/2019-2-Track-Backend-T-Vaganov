@@ -13,7 +13,9 @@ def search_by_username(request):
     if users.exists():
         users = users.values('id', 'username', 'first_name', 'last_name')
         return JsonResponse(list(users), safe=False, json_dumps_params={'ensure_ascii': False})
-    return JsonResponse('User not found', safe=False)
+    response = JsonResponse('User not found', safe=False)
+    response.status_code = 404
+    return response
     # return HttpResponse(list(users))
 
 
@@ -39,14 +41,15 @@ def contact_list(request):
     return JsonResponse(list(user), safe=False, json_dumps_params={'ensure_ascii': False})
 
 
+'''
 @require_http_methods(["GET"])
 def get_id(request):
-    name = request.GET.get('name', 'root')
+    name = request.GET.get('name', '')
     try:
         member = Member.objects.get(user__username=name, chat__topic='Group Chat')
     except Member.DoesNotExist:
-        return HttpResponseForbidden()
+        return HttpResponse(status=404)
     user = User.objects.get(username=name)
     return JsonResponse(user.id, safe=False, json_dumps_params={'ensure_ascii': False})
-
+'''
 

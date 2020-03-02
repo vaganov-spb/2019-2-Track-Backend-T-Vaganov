@@ -11,18 +11,20 @@ from chats.forms import ChatForm, MessageForm, AttachmentForm
 @require_http_methods(["GET"])
 def chats(request, user_id):
     chats_list = Member.objects.filter(user_id=user_id)
-    chats_list = chats_list.values('chat_id',
-                                   'last_read_message__content',
-                                   'last_read_message__added_at',
-                                   'chat__topic',
-                                   'user__avatar')
-    chats_list = chats_list.order_by('last_read_message__added_at')
-    return JsonResponse(
-        list(chats_list),
-        safe=False,
-        json_dumps_params={'ensure_ascii': False}
-    )
-    # return HttpResponse(list(chats_list))
+    if chats_list.exists():
+        chats_list = chats_list.values('chat_id',
+                                       'last_read_message__content',
+                                       'last_read_message__added_at',
+                                       'chat__topic',
+                                       'user__avatar')
+        chats_list = chats_list.order_by('last_read_message__added_at')
+        return JsonResponse(
+            list(chats_list),
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
+        )
+    else:
+        return HttpResponse(status=404)
 
 
 @require_http_methods(["POST"])
@@ -68,8 +70,7 @@ def message_list(request, user_id):
 @require_http_methods(["POST"])
 def send_message(request, user_id):
     form = MessageForm(request.POST, user_id=user_id)
-    print(request.POST.get('chat_id'))
-    #print(request.POST.get('content'))
+    # print(request.POST.get('content'))
     if form.is_valid():
         message = form.save()
         return JsonResponse('OK', safe=False)
@@ -98,6 +99,9 @@ def particular_chat(request, user_id, chat_id):
         'is group': chat.is_group_chat,
         'last message': chat.last_message,
     }
+
+    returnedTrue()
+
     return JsonResponse(data, json_dumps_params={'ensure_ascii': False})
 
 
@@ -137,5 +141,9 @@ def get_attachment(request, attachment_id, user_id):
             'Key': attach.file.name,
         },
         ExpiresIn=3600)
-    print(type(url))
+    # print(type(url))
     return JsonResponse(url, safe=False)
+
+
+def returnedTrue():
+    return True
