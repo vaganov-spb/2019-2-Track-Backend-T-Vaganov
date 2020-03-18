@@ -2,6 +2,10 @@ from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http
 from users.models import User, Member
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status
+from .serializers import UserSerializer, ProfileSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 @require_http_methods(["GET"])
@@ -53,3 +57,57 @@ def get_id(request):
     return JsonResponse(user.id, safe=False, json_dumps_params={'ensure_ascii': False})
 '''
 
+
+class GetMembers(viewsets.ModelViewSet):
+
+    def list(self, request, *args, **kwargs):
+        result = []
+        members = Member.objects.filter(chat_id=request.GET.get('chat_id')).values_list('user__id', flat=True).order_by('id')
+
+        for i in list(members):
+            result.append(User.objects.get(id=i))
+
+        serializer = UserSerializer(result, many=True)
+
+        return JsonResponse(serializer.data, safe=False)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'search_user':
+            return UserSerializer
+        if self.action == 'profile':
+            return ProfileSerializer
+        return self.serializer_class
+
+    @action(methods=['get'], detail=False)
+    def search_user(self, request):
+        username = request.GET.get('search', None)
+
+        if not username:
+            return Response(data='Can\'t get username param', status=status.HTTP_400_BAD_REQUEST)
+
+        users = self.get_queryset()
+        users = users.filter(username__icontains=username)
+
+        if users.exists():
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(users, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response({'users': "Not exists"}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['get'], detail=False, url_path='profile/(?P<user_id>[^/.]+)')
+    def profile(self, request, user_id=None):
+        users = self.get_queryset()
+        try:
+            user = users.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'user': 'Incorrect'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(user, many=False)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

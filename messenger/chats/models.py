@@ -35,6 +35,7 @@ class Message(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='users',
         verbose_name="user id",
     )
     content = models.CharField(

@@ -35,7 +35,7 @@ class CreateChat(TestCase):
     def test_incorrect_topic_empty(self):
         response = self.client.post('/chats/1/newchat/', {'topic': ''})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual((json.loads(response.content))['errors']['topic'][0], "Обязательное поле.")
+        self.assertEqual((json.loads(response.content))['errors']['topic'][0], "Это поле обязательно.")
 
     def test_incorrect_user(self):
         response = self.client.post('/chats/10/newchat/', {'topic': 'test_chat'})
