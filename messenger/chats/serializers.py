@@ -70,5 +70,6 @@ class NewMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['content', 'chat_id']
+        fields = ['content']
+
 

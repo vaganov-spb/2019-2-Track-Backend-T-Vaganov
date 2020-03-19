@@ -6,6 +6,7 @@ from chats import views
 router = DefaultRouter()
 router.register(r'chats', views.ChatViewSet, basename='chats')
 router.register(r'messages', views.MessageViewSet, basename='messages')
+router.register(r'attachment', views.AttachmentViewSet, basename='attachment')
 
 urlpatterns = [
     #path('<int:user_id>/', chat_list, name='chat_list'),

@@ -7,9 +7,14 @@ from chats.models import Chat, Message, Attachment
 from django.views.decorators.http import require_http_methods
 from chats.forms import ChatForm, MessageForm, AttachmentForm
 from rest_framework import viewsets, status
-from .serializers import MemberSerializer, ChatSerializer, NewChatSerializer, MessageListSerializer, NewMessageSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from .serializers import MemberSerializer, \
+    ChatSerializer, \
+    NewChatSerializer, \
+    MessageListSerializer, \
+    NewMessageSerializer
+    #AttachmentSerializer
 
 
 @require_http_methods(["GET"])
@@ -251,6 +256,49 @@ class MessageViewSet(viewsets.ModelViewSet):
         member_of_chat.last_read_message = message
         member_of_chat.save()
         return Response({'status': 'successfully marked'}, status.HTTP_200_OK)
+
+
+class AttachmentViewSet(viewsets.ModelViewSet):
+    queryset = Attachment.objects.all()
+
+    @action(methods=['get'], detail=False, url_path='user/(?P<user_id>[^/.]+)/attach/(?P<attachment_id>[^/.]+)')
+    def get_attachment(self, request, user_id=None, attachment_id=None):
+        try:
+            queryset = self.get_queryset()
+            attachment = queryset.get(id=attachment_id)
+            member = Member.objects.get(user_id=user_id, chat=attachment.chat)
+        except Attachment.DoesNotExist:
+            return Response({'error': 'No such doc'}, status.HTTP_400_BAD_REQUEST)
+        except Member.DoesNotExist:
+            return Response({'error': 'Not Allowed'}, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        session = boto3.session.Session()
+        s3_client = session.client(
+            service_name='s3',
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+
+        url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': 'track_vaganov',
+                'Key': attachment.file.name,
+            },
+            ExpiresIn=3600)
+
+        response = Response({'attachment': url}, status.HTTP_200_OK)
+        return response
+
+    @action(methods=['post'], detail=False, url_path='save')
+    def attachment_save(self, request):
+        form = AttachmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return Response({'status': 'Attachment successfully loaded.'}, status.HTTP_200_OK)
+        else:
+            return Response({'errors': form.errors}, status.HTTP_400_BAD_REQUEST)
 
 
 
