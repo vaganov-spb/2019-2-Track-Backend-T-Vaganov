@@ -47,10 +47,11 @@ class MessageForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         chat_id = self.cleaned_data['chatId']
-        # member = Member.objects.get(user_id=self._user_id, chat_id=chat_id)
+        member = Member.objects.get(user_id=self._user_id, chat_id=chat_id)
         mes = Message.objects.create(user_id=self._user_id, chat_id=chat_id, content=self.cleaned_data['content'])
-        # member.last_read_message = mes
-        # member.save()
+        member.last_read_message = mes
+        member.save()
+        return mes
 
     class Meta:
        model = Message

@@ -15,6 +15,7 @@ import os
 try:
     from .local_settings import *
     from .django_conf import *
+    from .config.json import *
 except ImportError:
     pass
 
@@ -33,7 +34,10 @@ SECRET_KEY = SECRET
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+]
 
 
 # Application definition
@@ -133,6 +137,10 @@ USE_L10N = True
 USE_TZ = True
 
 TIME_ZONE = 'UTC'
+
+CENTRIFUGE_ADDRESS = 'http://localhost:8000/api'
+CENTRIFUGE_SECRET = 'ebaeca03-356f-42d5-b197-731437765e9a'
+CENTRIFUGE_API = 'd5e1ddfb-e624-4898-b202-02d43826c3e8'
 
 CORS_ALLOW_CREDENTIALS = True
 

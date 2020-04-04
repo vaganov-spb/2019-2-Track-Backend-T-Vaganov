@@ -9,12 +9,14 @@ from chats.forms import ChatForm, MessageForm, AttachmentForm
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.conf import settings
+import jwt, json, datetime
+import requests
 from .serializers import MemberSerializer, \
     ChatSerializer, \
     NewChatSerializer, \
     MessageListSerializer, \
     NewMessageSerializer
-    #AttachmentSerializer
 
 
 @require_http_methods(["GET"])
@@ -52,7 +54,7 @@ def create_chat(request, user_id):
 @require_http_methods(["GET"])
 def message_list(request, user_id):
     data = []
-    chat_id = request.GET.get('chatId')
+    chat_id = request.GET.get('chat_id')
     if not chat_id:
         return HttpResponseBadRequest("Cant get chat_id param")
     member_of_chat = get_object_or_404(Member, chat_id=chat_id, user_id=user_id)
@@ -64,8 +66,9 @@ def message_list(request, user_id):
     for message in chat_messages:
         data.append({
             'time': message.added_at,
-            'text': message.content,
+            'message': message.content,
             'user': message.user.username,
+            'type': 'text',
         })
         member_of_chat.last_read_message = chat_messages.latest('added_at')
         member_of_chat.save(update_fields=["last_read_message"])
@@ -76,14 +79,34 @@ def message_list(request, user_id):
     )
 
 
+def myconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
 @require_http_methods(["POST"])
 def send_message(request, user_id):
-    form = MessageForm(request.POST, user_id=user_id)
-    # print(request.POST.get('content'))
+    form = MessageForm(json.loads(request.body), user_id=user_id)
     if form.is_valid():
         message = form.save()
+        headers = {'Content-type': 'application/json', 'Authorization': 'apikey ' + settings.CENTRIFUGE_API}
+        msg = {
+            #'time': message.added_at,
+            'text': message.content,
+            'user': message.user.username,
+        }
+        command = {
+            "method": "publish",
+            "params": {
+                "channel": "chat" + str(message.chat.id),
+                "data": {
+                    "message": msg,
+                }
+            }
+        }
+        data = json.dumps(command) # default=myconverter)
+        requests.post('http://localhost:8000/api/', data=data, headers=headers)
         return JsonResponse('OK', safe=False)
-        # return HttpResponse(list(lat_mes))
     else:
         return JsonResponse({'errors': form.errors}, status=400)
 

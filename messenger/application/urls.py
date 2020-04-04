@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import include
 from django.urls import path, re_path
+from home.views import centrifugo_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('chats/', include('chats.urls')),
+    path('centrifugo/', centrifugo_token, name='centrifugo'),
     path('users/', include('users.urls')),
     path('', include('home.urls')),
 ]
