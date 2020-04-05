@@ -111,8 +111,7 @@ def send_message(request, user_id):
             }
         }
         data = json.dumps(command)
-        wer = requests.post(settings.CENTRIFUGE_ADDRESS, data=data, headers=headers)
-        print(wer)
+        requests.post(settings.CENTRIFUGE_ADDRESS, data=data, headers=headers)
         return JsonResponse('OK', safe=False)
     else:
         return JsonResponse({'errors': form.errors}, status=400)
