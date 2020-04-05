@@ -10,13 +10,18 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
-import jwt, json, datetime
+import json
+import datetime
+from cent import Client, CentException
 import requests
 from .serializers import MemberSerializer, \
     ChatSerializer, \
     NewChatSerializer, \
     MessageListSerializer, \
     NewMessageSerializer
+
+
+client = Client(settings.CENTRIFUGE_ADDRESS, api_key=settings.CENTRIFUGE_API, timeout=1)
 
 
 @require_http_methods(["GET"])
@@ -91,21 +96,23 @@ def send_message(request, user_id):
         message = form.save()
         headers = {'Content-type': 'application/json', 'Authorization': 'apikey ' + settings.CENTRIFUGE_API}
         msg = {
-            #'time': message.added_at,
-            'text': message.content,
+            'time': myconverter(message.added_at),
+            'message': message.content,
             'user': message.user.username,
+            'type': 'text'
         }
         command = {
             "method": "publish",
             "params": {
-                "channel": "chat" + str(message.chat.id),
+                "channel": "chat:" + str(message.chat.id),
                 "data": {
                     "message": msg,
                 }
             }
         }
-        data = json.dumps(command) # default=myconverter)
-        requests.post('http://localhost:8000/api/', data=data, headers=headers)
+        data = json.dumps(command)
+        wer = requests.post(settings.CENTRIFUGE_ADDRESS, data=data, headers=headers)
+        print(wer)
         return JsonResponse('OK', safe=False)
     else:
         return JsonResponse({'errors': form.errors}, status=400)

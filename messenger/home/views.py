@@ -12,5 +12,6 @@ def enterpage(request):
 
 def centrifugo_token(request):
     claims = {"sub": str(request.GET.get('user_id'))}
+    print(claims)
     token = jwt.encode(claims, settings.CENTRIFUGE_SECRET, algorithm="HS256").decode()
     return JsonResponse({'token': token})

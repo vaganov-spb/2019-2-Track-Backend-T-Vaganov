@@ -2,5 +2,12 @@
   "token_hmac_secret_key": "6fe46d2d-0ef0-46cd-9303-e62c6cbc1133",
   "admin_password": "45915dc8-ca92-43c6-8746-6a0d25ebd136",
   "admin_secret": "ebaeca03-356f-42d5-b197-731437765e9a",
-  "api_key": "d5e1ddfb-e624-4898-b202-02d43826c3e8"
+  "api_key": "d5e1ddfb-e624-4898-b202-02d43826c3e8",
+  "namespaces": [
+	{
+		"name": "chat",
+ 		"publish": true
+	}
+  ],
+  "port": 9000
 }
